@@ -1,6 +1,9 @@
-﻿name: CI
+name: CI
 
 on: [push, pull_request]
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -19,8 +22,14 @@ jobs:
   deploy-check:
     needs: test
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - name: Deploy
-        run: echo "Deploying with token $APP_TOKEN"
+        run: |
+          if [ -z "$APP_TOKEN" ]; then
+            echo "::error::APP_TOKEN repository secret is missing."
+            exit 1
+          fi
+          echo "Deploy check passed: APP_TOKEN is configured."
         env:
-          APP_TOKEN: ${{ secrets.APP_TOK }}
+          APP_TOKEN: ${{ secrets.APP_TOKEN }}
